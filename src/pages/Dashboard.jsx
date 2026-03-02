@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, MapPinned, Route, RefreshCw, Calendar, FileSpreadsheet, ChevronDown, UploadCloud, Settings2, Play } from 'lucide-react';
+import { Clock, MapPinned, Route, RefreshCw, Calendar, FileSpreadsheet, ChevronDown, UploadCloud, Settings2, Play, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -26,15 +26,24 @@ export default function Dashboard() {
   // Estados: Ferramenta "Preencher IBGE"
   const [ibgeFile, setIbgeFile] = useState(null);
 
+  // ESTADOS DE LOADING (Animação dos Botões)
+  const [loadingIbge, setLoadingIbge] = useState(false);
+  const [loadingPrazos, setLoadingPrazos] = useState(false);
+  const [loadingRegiao, setLoadingRegiao] = useState(false);
+  const [loadingRotas, setLoadingRotas] = useState(false);
+  const [loadingSN, setLoadingSN] = useState(false);
+  const [loadingSTQQS, setLoadingSTQQS] = useState(false);
+
   const toggleCard = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
   // 1. Ferramentas Simples
-  const processSingleFile = async (e, endpoint, downloadName) => {
+  const processSingleFile = async (e, endpoint, downloadName, setLoading) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setLoading(true);
     const toastId = toast.loading(`A processar ${file.name}...`, { style: { background: '#121212', color: '#fff' }});
     
     try {
@@ -61,8 +70,10 @@ export default function Dashboard() {
       toast.success('Ficheiro processado com sucesso!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
     } catch (error) {
       toast.error('Erro ao processar ficheiro.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' } });
+    } finally {
+      setLoading(false);
+      e.target.value = null; 
     }
-    e.target.value = null; 
   };
 
   // 2. Preencher IBGE
@@ -72,7 +83,9 @@ export default function Dashboard() {
         return;
     }
 
+    setLoadingIbge(true);
     const toastId = toast.loading("A pesquisar códigos IBGE na nuvem...", { style: { background: '#121212', color: '#fff' }});
+    
     try {
         const formData = new FormData();
         formData.append('arquivo', ibgeFile);
@@ -92,6 +105,8 @@ export default function Dashboard() {
         toast.success('Códigos IBGE preenchidos!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
     } catch (e) {
         toast.error('Falha no processamento.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' }});
+    } finally {
+        setLoadingIbge(false);
     }
   };
 
@@ -102,7 +117,9 @@ export default function Dashboard() {
         return;
     }
 
+    setLoadingPrazos(true);
     const toastId = toast.loading("A cruzar dados de prazos...", { style: { background: '#121212', color: '#fff' }});
+    
     try {
         const formData = new FormData();
         formData.append('destino', prazosDestino);
@@ -123,6 +140,8 @@ export default function Dashboard() {
         toast.success('Prazos atualizados com sucesso!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
     } catch (e) {
         toast.error('Falha no cruzamento de dados.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' }});
+    } finally {
+        setLoadingPrazos(false);
     }
   };
 
@@ -133,7 +152,9 @@ export default function Dashboard() {
         return;
     }
 
+    setLoadingRegiao(true);
     const toastId = toast.loading("A criar regiões...", { style: { background: '#121212', color: '#fff' }});
+    
     try {
         const formData = new FormData();
         formData.append('base', regiaoBase);
@@ -157,6 +178,8 @@ export default function Dashboard() {
         toast.success('Regiões criadas!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
     } catch (e) {
         toast.error('Falha no processamento.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' }});
+    } finally {
+        setLoadingRegiao(false);
     }
   };
 
@@ -167,7 +190,9 @@ export default function Dashboard() {
         return;
     }
 
+    setLoadingRotas(true);
     const toastId = toast.loading("A gerar rotas...", { style: { background: '#121212', color: '#fff' }});
+    
     try {
         const formData = new FormData();
         formData.append('modelo', rotasModelo);
@@ -191,6 +216,8 @@ export default function Dashboard() {
         toast.success('Rotas geradas com sucesso!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
     } catch (e) {
         toast.error('Falha ao gerar rotas.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' }});
+    } finally {
+        setLoadingRotas(false);
     }
   };
 
@@ -200,6 +227,9 @@ export default function Dashboard() {
       <style>{`
         @keyframes border-glow-spin { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .animate-magic-border { background-size: 200% 200%; animation: border-glow-spin 3s linear infinite; }
+        
+        @keyframes loading-bar { 0% { transform: translateX(-150%); } 100% { transform: translateX(250%); } }
+        .animate-loading-bar { animation: loading-bar 1.5s ease-in-out infinite; }
         
         /* Custom scrollbar para os cartões abertos */
         .glass-scroll::-webkit-scrollbar { width: 4px; }
@@ -226,7 +256,7 @@ export default function Dashboard() {
                 <UploadBtn label="Planilha Destino" file={prazosDestino} onChange={(e) => setPrazosDestino(e.target.files[0])} />
                 <UploadBtn label="Base de Prazos" file={prazosBase} onChange={(e) => setPrazosBase(e.target.files[0])} />
              </div>
-             <ActionBtn label="Processar Prazos" onClick={handlePreencherPrazos} color="blue" />
+             <ActionBtn label="Processar Prazos" onClick={handlePreencherPrazos} color="blue" isLoading={loadingPrazos} />
         </GlassCard>
 
         {/* === PREENCHER IBGE === */}
@@ -238,7 +268,7 @@ export default function Dashboard() {
              <div className="h-20 mb-4">
                 <UploadBtn label="Planilha Destino (Base)" file={ibgeFile} onChange={(e) => setIbgeFile(e.target.files[0])} />
              </div>
-             <ActionBtn label="Preencher IBGE" onClick={handlePreencherIbge} color="emerald" />
+             <ActionBtn label="Preencher IBGE" onClick={handlePreencherIbge} color="emerald" isLoading={loadingIbge} />
         </GlassCard>
 
         {/* === CRIAR REGIÃO === */}
@@ -259,7 +289,7 @@ export default function Dashboard() {
                 <UploadBtn label="Base Prazos" file={regiaoBase} onChange={(e) => setRegiaoBase(e.target.files[0])} />
                 <UploadBtn label="Modelo Reg." file={regiaoModelo} onChange={(e) => setRegiaoModelo(e.target.files[0])} />
              </div>
-             <ActionBtn label="Criar Regiões" onClick={handleCriarRegiao} color="purple" />
+             <ActionBtn label="Criar Regiões" onClick={handleCriarRegiao} color="purple" isLoading={loadingRegiao} />
         </GlassCard>
 
         {/* === GERAR ROTAS === */}
@@ -277,7 +307,7 @@ export default function Dashboard() {
              <div className="h-16 mb-4">
                 <UploadBtn label="Modelo de Regiões" file={rotasModelo} onChange={(e) => setRotasModelo(e.target.files[0])} />
              </div>
-             <ActionBtn label="Gerar Rotas" onClick={handleGerarRotas} color="orange" />
+             <ActionBtn label="Gerar Rotas" onClick={handleGerarRotas} color="orange" isLoading={loadingRotas} />
         </GlassCard>
 
         {/* === CONVERTER S/N === */}
@@ -287,7 +317,10 @@ export default function Dashboard() {
           isExpanded={expandedId === 'sn'} onToggle={() => toggleCard('sn')}
         >
             <div className="h-24">
-                <UploadBtn label="Anexar Excel para Processar" onChange={(e) => processSingleFile(e, 'converter-sn', 'Frequencia_Convertida_SN.xlsx')} />
+                <UploadBtn 
+                  label={loadingSN ? "A Processar..." : "Anexar Excel para Processar"} 
+                  onChange={(e) => processSingleFile(e, 'converter-sn', 'Frequencia_Convertida_SN.xlsx', setLoadingSN)} 
+                />
             </div>
         </GlassCard>
 
@@ -298,7 +331,10 @@ export default function Dashboard() {
           isExpanded={expandedId === 'stqqs'} onToggle={() => toggleCard('stqqs')}
         >
             <div className="h-24">
-                <UploadBtn label="Anexar Excel para Processar" onChange={(e) => processSingleFile(e, 'converter-stqqs', 'Frequencia_Convertida_STQQS.xlsx')} />
+                <UploadBtn 
+                  label={loadingSTQQS ? "A Processar..." : "Anexar Excel para Processar"} 
+                  onChange={(e) => processSingleFile(e, 'converter-stqqs', 'Frequencia_Convertida_STQQS.xlsx', setLoadingSTQQS)} 
+                />
             </div>
         </GlassCard>
 
@@ -326,19 +362,12 @@ function GlassCard({ title, desc, icon, color, children, isExpanded, onToggle })
     <div onClick={onToggle} className={`group relative w-full rounded-[28px] p-[1px] transition-all duration-500 ease-out cursor-pointer shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]
       ${isExpanded ? `bg-gradient-to-r ${theme.border} animate-magic-border shadow-[0_15px_50px_rgba(0,0,0,0.6)] -translate-y-1` : 'bg-white/[0.05] hover:bg-white/[0.1] hover:-translate-y-1'}
     `}>
-      
-      {/* O Vidro Líquido (Base Principal) */}
       <div className="relative w-full h-full bg-black/30 backdrop-blur-[40px] backdrop-saturate-[150%] rounded-[27px] overflow-hidden flex flex-col">
-        
-        {/* Luz Ambiente Borrada */}
         <div className={`absolute -top-16 -right-16 w-56 h-56 rounded-full ${theme.glow} opacity-10 blur-[80px] pointer-events-none transition-all duration-700 ease-in-out group-hover:opacity-30 group-hover:scale-125 ${isExpanded && 'opacity-40'}`}></div>
-        
-        {/* Reflexo Superior (iPhone Highlight) */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none rounded-[27px]"></div>
 
         <div className="relative z-10 flex items-center justify-between p-6">
           <div className="flex items-center gap-4">
-            {/* Ícone no Estilo iOS Widget */}
             <div className={`w-12 h-12 flex items-center justify-center rounded-2xl bg-gradient-to-br ${theme.iconBox} shadow-[0_4px_15px_rgba(0,0,0,0.3)] border border-white/20 transform transition-all duration-500 ease-out ${isExpanded ? 'scale-110 rotate-3' : 'group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}>
               {icon}
             </div>
@@ -352,7 +381,6 @@ function GlassCard({ title, desc, icon, color, children, isExpanded, onToggle })
           </div>
         </div>
 
-        {/* Área Expansível */}
         <div className={`relative z-10 px-6 transition-all duration-500 ease-in-out overflow-hidden glass-scroll ${isExpanded ? 'max-h-[600px] opacity-100 pb-6' : 'max-h-0 opacity-0'}`}>
           <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5"></div>
           <div onClick={(e) => e.stopPropagation()} className="relative">
@@ -393,18 +421,34 @@ const UploadBtn = ({ label, onChange, file }) => (
   </label>
 );
 
-const ActionBtn = ({ label, onClick, color }) => {
+const ActionBtn = ({ label, onClick, color, isLoading }) => {
   const glowColors = {
-    blue: "hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/40 hover:text-white",
-    emerald: "hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/40 hover:text-white",
-    purple: "hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/40 hover:text-white",
-    orange: "hover:shadow-[0_0_20px_rgba(249,115,22,0.5)] bg-orange-500/20 text-orange-300 border-orange-500/30 hover:bg-orange-500/40 hover:text-white",
+    blue: "hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] bg-blue-500/20 text-blue-300 border-blue-500/30",
+    emerald: "hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    purple: "hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] bg-purple-500/20 text-purple-300 border-purple-500/30",
+    orange: "hover:shadow-[0_0_20px_rgba(249,115,22,0.5)] bg-orange-500/20 text-orange-300 border-orange-500/30",
   };
-  const btnStyle = glowColors[color] || "bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]";
+  
+  const baseStyle = glowColors[color] || "bg-white/5 text-white border-white/10 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]";
+  const hoverStyle = isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-white/10 hover:border-white/40 hover:text-white";
 
   return (
-    <button onClick={onClick} className={`w-full mt-4 backdrop-blur-md border font-bold uppercase tracking-widest text-[11px] py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 ${btnStyle}`}>
-       <Play size={14} fill="currentColor"/> {label}
+    <button 
+      onClick={onClick} 
+      disabled={isLoading}
+      className={`relative overflow-hidden w-full mt-4 backdrop-blur-md border font-bold uppercase tracking-widest text-[11px] py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 ${baseStyle} ${hoverStyle}`}
+    >
+       {/* Barra de Loading Animada */}
+       {isLoading && (
+          <div className="absolute inset-0 w-full h-full pointer-events-none">
+             <div className="h-full bg-white/20 animate-loading-bar w-[40%] rounded-full blur-sm"></div>
+          </div>
+       )}
+       
+       <div className="relative z-10 flex items-center gap-2">
+         {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={14} fill="currentColor"/>} 
+         {isLoading ? 'A PROCESSAR...' : label}
+       </div>
     </button>
   );
 };
