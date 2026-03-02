@@ -5,25 +5,32 @@ import toast from 'react-hot-toast';
 export default function Dashboard() {
   const [expandedId, setExpandedId] = useState(null);
 
-  // Estados para a Ferramenta "Criar Região"
+  // Estados: Ferramenta "Criar Região"
   const [regiaoOpcao, setRegiaoOpcao] = useState('1');
   const [regiaoNome, setRegiaoNome] = useState('');
   const [regiaoCnpj, setRegiaoCnpj] = useState('');
   const [regiaoBase, setRegiaoBase] = useState(null);
   const [regiaoModelo, setRegiaoModelo] = useState(null);
 
-  // Estados para a Ferramenta "Gerar Rotas"
+  // Estados: Ferramenta "Gerar Rotas"
   const [rotasCnpj, setRotasCnpj] = useState('');
   const [rotasNome, setRotasNome] = useState('');
   const [rotasDesc, setRotasDesc] = useState('');
   const [rotasIbge, setRotasIbge] = useState('');
   const [rotasModelo, setRotasModelo] = useState(null);
 
+  // Estados: Ferramenta "Preencher Prazos"
+  const [prazosDestino, setPrazosDestino] = useState(null);
+  const [prazosBase, setPrazosBase] = useState(null);
+
+  // Estados: Ferramenta "Preencher IBGE"
+  const [ibgeFile, setIbgeFile] = useState(null);
+
   const toggleCard = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  // 1. Função para Ferramentas Simples (Apenas 1 Ficheiro - S/N e STQQS)
+  // 1. Ferramentas Simples (Apenas 1 Ficheiro - S/N e STQQS)
   const processSingleFile = async (e, endpoint, downloadName) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -41,7 +48,6 @@ export default function Dashboard() {
 
       if (!response.ok) throw new Error('Erro na resposta da API');
 
-      // Transferir Ficheiro
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -52,14 +58,75 @@ export default function Dashboard() {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      toast.success('Ficheiro convertido com sucesso!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
+      toast.success('Ficheiro processado com sucesso!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
     } catch (error) {
-      toast.error('Erro ao converter ficheiro.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' } });
+      toast.error('Erro ao processar ficheiro.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' } });
     }
-    e.target.value = null; // Reset do input
+    e.target.value = null; 
   };
 
-  // 2. Função para "Criar Região"
+  // 2. Preencher IBGE
+  const handlePreencherIbge = async () => {
+    if (!ibgeFile) {
+        toast.error('Anexe a planilha de destino primeiro.', { style: { background: '#121212', color: '#fff', border: '1px solid #ef4444' }});
+        return;
+    }
+
+    const toastId = toast.loading("A pesquisar códigos IBGE na nuvem...", { style: { background: '#121212', color: '#fff' }});
+    try {
+        const formData = new FormData();
+        formData.append('arquivo', ibgeFile);
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ferramentas/preencher-ibge`, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Erro na API');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "Base_IBGE_Preenchida.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        toast.success('Códigos IBGE preenchidos!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
+    } catch (e) {
+        toast.error('Falha no processamento.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' }});
+    }
+  };
+
+  // 3. Preencher Prazos e Frequência
+  const handlePreencherPrazos = async () => {
+    if (!prazosDestino || !prazosBase) {
+        toast.error('Anexe a Planilha de Destino e a Base de Prazos.', { style: { background: '#121212', color: '#fff', border: '1px solid #ef4444' }});
+        return;
+    }
+
+    const toastId = toast.loading("A cruzar dados de prazos...", { style: { background: '#121212', color: '#fff' }});
+    try {
+        const formData = new FormData();
+        formData.append('destino', prazosDestino);
+        formData.append('base', prazosBase);
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ferramentas/preencher-prazos`, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Erro na API');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "Destino_Prazos_Atualizados.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        toast.success('Prazos atualizados com sucesso!', { id: toastId, style: { border: '1px solid #10b981', background: '#121212', color: '#fff' }});
+    } catch (e) {
+        toast.error('Falha no cruzamento de dados.', { id: toastId, style: { border: '1px solid #ef4444', background: '#121212', color: '#fff' }});
+    }
+  };
+
+  // 4. Criar Região
   const handleCriarRegiao = async () => {
     if (!regiaoCnpj || !regiaoBase || !regiaoModelo) {
         toast.error('Preencha o CNPJ e anexe os dois ficheiros.', { style: { background: '#121212', color: '#fff', border: '1px solid #ef4444' }});
@@ -93,7 +160,7 @@ export default function Dashboard() {
     }
   };
 
-  // 3. Função para "Gerar Rotas"
+  // 5. Gerar Rotas
   const handleGerarRotas = async () => {
     if (!rotasCnpj || !rotasIbge || !rotasModelo) {
         toast.error('CNPJ, IBGE Origem e Modelo são obrigatórios.', { style: { background: '#121212', color: '#fff', border: '1px solid #ef4444' }});
@@ -144,6 +211,31 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
+        {/* === PREENCHER PRAZOS E FREQUÊNCIA === */}
+        <GlassCard 
+          id="prazos" title="Prazos e Frequência" desc="Cruza base de dados com tabela padrão."
+          icon={<Clock size={24} className="text-white"/>} color="blue"
+          isExpanded={expandedId === 'prazos'} onToggle={() => toggleCard('prazos')}
+        >
+             <div className="grid grid-cols-2 gap-3 h-20 mb-4">
+                <UploadBtn label="Planilha Destino" file={prazosDestino} onChange={(e) => setPrazosDestino(e.target.files[0])} />
+                <UploadBtn label="Base de Prazos" file={prazosBase} onChange={(e) => setPrazosBase(e.target.files[0])} />
+             </div>
+             <ActionBtn label="Preencher Prazos" onClick={handlePreencherPrazos} />
+        </GlassCard>
+
+        {/* === PREENCHER IBGE === */}
+        <GlassCard 
+          id="ibge" title="Preencher IBGE" desc="Cruza Cidades e preenche códigos IBGE."
+          icon={<FileSpreadsheet size={24} className="text-white"/>} color="emerald"
+          isExpanded={expandedId === 'ibge'} onToggle={() => toggleCard('ibge')}
+        >
+             <div className="h-20 mb-4">
+                <UploadBtn label="Planilha Destino (Base)" file={ibgeFile} onChange={(e) => setIbgeFile(e.target.files[0])} />
+             </div>
+             <ActionBtn label="Preencher IBGE Automático" onClick={handlePreencherIbge} />
+        </GlassCard>
+
         {/* === CRIAR REGIÃO === */}
         <GlassCard 
           id="regiao" title="Criar Região" desc="Estruturação CEP/KM."
@@ -158,7 +250,7 @@ export default function Dashboard() {
                <GlassInput placeholder="CNPJ da Transportadora" value={regiaoCnpj} onChange={(e) => setRegiaoCnpj(e.target.value)} />
                <GlassInput placeholder="Nome Transp. (Opcional)" value={regiaoNome} onChange={(e) => setRegiaoNome(e.target.value)} />
              </div>
-             <div className="grid grid-cols-2 gap-3">
+             <div className="grid grid-cols-2 gap-3 h-16 mb-2">
                 <UploadBtn label="Base Prazos" file={regiaoBase} onChange={(e) => setRegiaoBase(e.target.files[0])} />
                 <UploadBtn label="Modelo Reg." file={regiaoModelo} onChange={(e) => setRegiaoModelo(e.target.files[0])} />
              </div>
@@ -203,23 +295,6 @@ export default function Dashboard() {
             <div className="h-24">
                 <UploadBtn label="Anexar Excel para Processar" onChange={(e) => processSingleFile(e, 'converter-stqqs', 'Frequencia_Convertida_STQQS.xlsx')} />
             </div>
-        </GlassCard>
-
-        {/* Ferramentas em Desenvolvimento / Mock */}
-        <GlassCard 
-          id="prazos" title="Prazos e Frequência" desc="Brevemente: Integração Nuvem."
-          icon={<Clock size={24} className="text-white"/>} color="blue"
-          isExpanded={expandedId === 'prazos'} onToggle={() => toggleCard('prazos')}
-        >
-            <p className="text-sm text-gray-400 text-center py-4">API em construção para esta ferramenta.</p>
-        </GlassCard>
-
-        <GlassCard 
-          id="ibge" title="Preencher IBGE" desc="Brevemente: Integração Nuvem."
-          icon={<FileSpreadsheet size={24} className="text-white"/>} color="emerald"
-          isExpanded={expandedId === 'ibge'} onToggle={() => toggleCard('ibge')}
-        >
-            <p className="text-sm text-gray-400 text-center py-4">A usar base de dados local na aba "Base IBGE".</p>
         </GlassCard>
 
       </div>
