@@ -195,52 +195,56 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10">
+    <div className="max-w-7xl mx-auto space-y-10 relative z-10">
       
       <style>{`
         @keyframes border-glow-spin { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .animate-magic-border { background-size: 200% 200%; animation: border-glow-spin 3s linear infinite; }
+        
+        /* Custom scrollbar para os cartões abertos */
+        .glass-scroll::-webkit-scrollbar { width: 4px; }
+        .glass-scroll::-webkit-scrollbar-track { background: transparent; }
+        .glass-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
       `}</style>
 
-      <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-white/10 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-white/5 pb-6">
         <div>
-          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Dashboard de Ferramentas</h1>
-          <p className="text-gray-400 mt-2 font-light">Selecione uma ferramenta abaixo para configurar e executar.</p>
+          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 drop-shadow-sm">Ferramentas Logísticas</h1>
+          <p className="text-white/50 mt-2 font-light tracking-wide">Workspace com integração cloud em tempo real.</p>
         </div>
       </div>
 
-      {/* AQUI ESTÃO OS 6 CARTÕES, SEM DUPLICAÇÕES */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* === PREENCHER PRAZOS E FREQUÊNCIA === */}
         <GlassCard 
           id="prazos" title="Prazos e Frequência" desc="Cruza base de dados com tabela padrão."
-          icon={<Clock size={24} className="text-white"/>} color="blue"
+          icon={<Clock size={22} className="text-white drop-shadow-md"/>} color="blue"
           isExpanded={expandedId === 'prazos'} onToggle={() => toggleCard('prazos')}
         >
              <div className="grid grid-cols-2 gap-3 h-20 mb-4">
                 <UploadBtn label="Planilha Destino" file={prazosDestino} onChange={(e) => setPrazosDestino(e.target.files[0])} />
                 <UploadBtn label="Base de Prazos" file={prazosBase} onChange={(e) => setPrazosBase(e.target.files[0])} />
              </div>
-             <ActionBtn label="Processar Prazos" onClick={handlePreencherPrazos} />
+             <ActionBtn label="Processar Prazos" onClick={handlePreencherPrazos} color="blue" />
         </GlassCard>
 
         {/* === PREENCHER IBGE === */}
         <GlassCard 
           id="ibge" title="Preencher IBGE" desc="Cruza Cidades e preenche códigos IBGE."
-          icon={<FileSpreadsheet size={24} className="text-white"/>} color="emerald"
+          icon={<FileSpreadsheet size={22} className="text-white drop-shadow-md"/>} color="emerald"
           isExpanded={expandedId === 'ibge'} onToggle={() => toggleCard('ibge')}
         >
              <div className="h-20 mb-4">
                 <UploadBtn label="Planilha Destino (Base)" file={ibgeFile} onChange={(e) => setIbgeFile(e.target.files[0])} />
              </div>
-             <ActionBtn label="Preencher IBGE" onClick={handlePreencherIbge} />
+             <ActionBtn label="Preencher IBGE" onClick={handlePreencherIbge} color="emerald" />
         </GlassCard>
 
         {/* === CRIAR REGIÃO === */}
         <GlassCard 
           id="regiao" title="Criar Região" desc="Estruturação CEP/KM."
-          icon={<MapPinned size={24} className="text-white"/>} color="purple"
+          icon={<MapPinned size={22} className="text-white drop-shadow-md"/>} color="purple"
           isExpanded={expandedId === 'regiao'} onToggle={() => toggleCard('regiao')}
         >
              <div className="space-y-3 mb-4">
@@ -255,13 +259,13 @@ export default function Dashboard() {
                 <UploadBtn label="Base Prazos" file={regiaoBase} onChange={(e) => setRegiaoBase(e.target.files[0])} />
                 <UploadBtn label="Modelo Reg." file={regiaoModelo} onChange={(e) => setRegiaoModelo(e.target.files[0])} />
              </div>
-             <ActionBtn label="Criar Regiões" onClick={handleCriarRegiao} />
+             <ActionBtn label="Criar Regiões" onClick={handleCriarRegiao} color="purple" />
         </GlassCard>
 
         {/* === GERAR ROTAS === */}
         <GlassCard 
           id="rotas" title="Gerar Rotas" desc="Roteirização Logística (Excel)."
-          icon={<Route size={24} className="text-white"/>} color="orange"
+          icon={<Route size={22} className="text-white drop-shadow-md"/>} color="orange"
           isExpanded={expandedId === 'rotas'} onToggle={() => toggleCard('rotas')}
         >
              <div className="space-y-3 mb-4">
@@ -270,16 +274,16 @@ export default function Dashboard() {
                <GlassInput placeholder="Código IBGE Origem" value={rotasIbge} onChange={(e) => setRotasIbge(e.target.value)} />
                <GlassInput placeholder="Descrição Adicional" value={rotasDesc} onChange={(e) => setRotasDesc(e.target.value)} />
              </div>
-             <div className="h-16 mb-2">
+             <div className="h-16 mb-4">
                 <UploadBtn label="Modelo de Regiões" file={rotasModelo} onChange={(e) => setRotasModelo(e.target.files[0])} />
              </div>
-             <ActionBtn label="Gerar Rotas" onClick={handleGerarRotas} />
+             <ActionBtn label="Gerar Rotas" onClick={handleGerarRotas} color="orange" />
         </GlassCard>
 
         {/* === CONVERTER S/N === */}
         <GlassCard 
           id="sn" title="Converter S/N" desc="Normalização Booleana automática."
-          icon={<RefreshCw size={24} className="text-white"/>} color="cyan"
+          icon={<RefreshCw size={22} className="text-white drop-shadow-md"/>} color="cyan"
           isExpanded={expandedId === 'sn'} onToggle={() => toggleCard('sn')}
         >
             <div className="h-24">
@@ -290,7 +294,7 @@ export default function Dashboard() {
         {/* === CONVERTER STQQS === */}
         <GlassCard 
           id="stqqs" title="Converter STQQS" desc="Parsing de string semanal."
-          icon={<Calendar size={24} className="text-white"/>} color="pink"
+          icon={<Calendar size={22} className="text-white drop-shadow-md"/>} color="pink"
           isExpanded={expandedId === 'stqqs'} onToggle={() => toggleCard('stqqs')}
         >
             <div className="h-24">
@@ -304,43 +308,56 @@ export default function Dashboard() {
 }
 
 // ==========================================
-// COMPONENTES UI REAPROVEITÁVEIS
+// COMPONENTES "LIQUID GLASS" (ESTILO APPLE)
 // ==========================================
 
 function GlassCard({ title, desc, icon, color, children, isExpanded, onToggle }) {
   const styles = {
-    blue: { glow: "bg-blue-600", iconBox: "from-blue-500 to-indigo-600", magicBorder: "from-blue-500 via-indigo-400 to-blue-600", text: "text-blue-400" },
-    emerald: { glow: "bg-emerald-600", iconBox: "from-emerald-500 to-green-600", magicBorder: "from-emerald-500 via-green-400 to-emerald-600", text: "text-emerald-400" },
-    purple: { glow: "bg-purple-600", iconBox: "from-purple-500 to-fuchsia-600", magicBorder: "from-purple-500 via-pink-400 to-purple-600", text: "text-purple-400" },
-    orange: { glow: "bg-orange-600", iconBox: "from-orange-500 to-red-600", magicBorder: "from-orange-500 via-yellow-400 to-orange-600", text: "text-orange-400" },
-    cyan: { glow: "bg-cyan-600", iconBox: "from-cyan-500 to-blue-600", magicBorder: "from-cyan-500 via-teal-400 to-cyan-600", text: "text-cyan-400" },
-    pink: { glow: "bg-pink-600", iconBox: "from-pink-500 to-rose-600", magicBorder: "from-pink-500 via-rose-400 to-pink-600", text: "text-pink-400" },
+    blue: { glow: "bg-blue-500", iconBox: "from-blue-500 to-indigo-600", border: "from-blue-400/50 via-indigo-500/50 to-blue-600/50", text: "text-blue-300" },
+    emerald: { glow: "bg-emerald-500", iconBox: "from-emerald-400 to-teal-600", border: "from-emerald-400/50 via-teal-500/50 to-emerald-600/50", text: "text-emerald-300" },
+    purple: { glow: "bg-purple-500", iconBox: "from-purple-500 to-fuchsia-600", border: "from-purple-400/50 via-fuchsia-500/50 to-purple-600/50", text: "text-purple-300" },
+    orange: { glow: "bg-orange-500", iconBox: "from-orange-400 to-red-500", border: "from-orange-400/50 via-red-500/50 to-orange-600/50", text: "text-orange-300" },
+    cyan: { glow: "bg-cyan-500", iconBox: "from-cyan-400 to-blue-500", border: "from-cyan-400/50 via-blue-500/50 to-cyan-600/50", text: "text-cyan-300" },
+    pink: { glow: "bg-pink-500", iconBox: "from-pink-400 to-rose-600", border: "from-pink-400/50 via-rose-500/50 to-pink-600/50", text: "text-pink-300" },
   };
   const theme = styles[color] || styles.blue;
 
   return (
-    <div onClick={onToggle} className={`group relative w-full rounded-3xl p-[1px] transition-all duration-500 ease-out cursor-pointer overflow-hidden shadow-2xl ${isExpanded ? `bg-gradient-to-r ${theme.magicBorder} animate-magic-border shadow-[0_0_30px_rgba(0,0,0,0.5)]` : 'bg-white/10 hover:bg-white/20 hover:-translate-y-2'}`}>
-      <div className="relative w-full h-full bg-[#121212]/80 backdrop-blur-3xl rounded-[23px] overflow-hidden">
-        <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full ${theme.glow} opacity-20 blur-[80px] pointer-events-none transition-all duration-700 ease-in-out group-hover:opacity-40 group-hover:scale-125`}></div>
+    <div onClick={onToggle} className={`group relative w-full rounded-[28px] p-[1px] transition-all duration-500 ease-out cursor-pointer shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]
+      ${isExpanded ? `bg-gradient-to-r ${theme.border} animate-magic-border shadow-[0_15px_50px_rgba(0,0,0,0.6)] -translate-y-1` : 'bg-white/[0.05] hover:bg-white/[0.1] hover:-translate-y-1'}
+    `}>
+      
+      {/* O Vidro Líquido (Base Principal) */}
+      <div className="relative w-full h-full bg-black/30 backdrop-blur-[40px] backdrop-saturate-[150%] rounded-[27px] overflow-hidden flex flex-col">
+        
+        {/* Luz Ambiente Borrada */}
+        <div className={`absolute -top-16 -right-16 w-56 h-56 rounded-full ${theme.glow} opacity-10 blur-[80px] pointer-events-none transition-all duration-700 ease-in-out group-hover:opacity-30 group-hover:scale-125 ${isExpanded && 'opacity-40'}`}></div>
+        
+        {/* Reflexo Superior (iPhone Highlight) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none rounded-[27px]"></div>
 
         <div className="relative z-10 flex items-center justify-between p-6">
-          <div className="flex items-center gap-5">
-            <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${theme.iconBox} shadow-lg transform transition-all duration-500 ease-out ${isExpanded ? 'scale-110 rotate-3 shadow-lg shadow-black/20' : 'group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}>
+          <div className="flex items-center gap-4">
+            {/* Ícone no Estilo iOS Widget */}
+            <div className={`w-12 h-12 flex items-center justify-center rounded-2xl bg-gradient-to-br ${theme.iconBox} shadow-[0_4px_15px_rgba(0,0,0,0.3)] border border-white/20 transform transition-all duration-500 ease-out ${isExpanded ? 'scale-110 rotate-3' : 'group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}>
               {icon}
             </div>
             <div className="flex flex-col">
-              <h3 className="text-lg font-bold text-white tracking-wide group-hover:text-white transition-colors">{title}</h3>
-              <span className={`text-xs font-medium transition-colors duration-300 ${isExpanded ? theme.text : 'text-gray-500 group-hover:text-gray-400'}`}>{desc}</span>
+              <h3 className="text-[17px] font-bold text-white/90 tracking-wide transition-colors group-hover:text-white drop-shadow-sm">{title}</h3>
+              <span className={`text-[11px] font-medium transition-colors duration-300 ${isExpanded ? theme.text : 'text-white/40 group-hover:text-white/60'}`}>{desc}</span>
             </div>
           </div>
-          <div className={`p-2 rounded-full border border-white/5 bg-white/5 transition-all duration-300 ${isExpanded ? 'bg-white/10 rotate-180 text-white' : 'group-hover:bg-white/10 text-gray-500 group-hover:text-white'}`}>
-            <ChevronDown size={20} />
+          <div className={`p-2 rounded-full backdrop-blur-md border transition-all duration-300 ${isExpanded ? 'bg-white/10 border-white/20 rotate-180 text-white shadow-inner' : 'bg-black/20 border-white/5 text-white/40 group-hover:bg-white/5 group-hover:text-white'}`}>
+            <ChevronDown size={18} strokeWidth={2.5}/>
           </div>
         </div>
 
-        <div className={`relative z-10 px-6 transition-all duration-500 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[500px] opacity-100 pb-6' : 'max-h-0 opacity-0'}`}>
+        {/* Área Expansível */}
+        <div className={`relative z-10 px-6 transition-all duration-500 ease-in-out overflow-hidden glass-scroll ${isExpanded ? 'max-h-[600px] opacity-100 pb-6' : 'max-h-0 opacity-0'}`}>
           <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5"></div>
-          <div onClick={(e) => e.stopPropagation()}>{children}</div>
+          <div onClick={(e) => e.stopPropagation()} className="relative">
+             {children}
+          </div>
         </div>
       </div>
     </div>
@@ -351,25 +368,24 @@ const GlassInput = ({ ...props }) => (
   <input 
     {...props} 
     style={{ fontFamily: "'JetBrains Mono', monospace" }} 
-    className="w-full bg-[#09090b]/50 border border-white/10 rounded-xl px-4 py-3 text-[13px] text-emerald-400 placeholder-gray-600 outline-none focus:border-white/30 focus:bg-[#09090b]/90 focus:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all mb-2" 
+    className="w-full bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-[13px] text-white placeholder-white/30 outline-none focus:border-white/40 focus:bg-white/5 focus:shadow-[0_0_20px_rgba(255,255,255,0.05)] transition-all mb-2 shadow-inner" 
   />
 );
 
 const GlassSelect = ({ options, ...props }) => (
   <div className="relative mb-2">
-    <select {...props} style={{ fontFamily: "'JetBrains Mono', monospace" }} className="w-full bg-[#09090b]/50 border border-white/10 rounded-xl px-4 py-3 text-[13px] text-emerald-400 outline-none focus:border-white/30 appearance-none cursor-pointer">
-      {options.map((opt, i) => <option value={opt.value} key={i}>{opt.label}</option>)}
+    <select {...props} style={{ fontFamily: "'JetBrains Mono', monospace" }} className="w-full bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-[13px] text-white outline-none focus:border-white/40 focus:bg-white/5 appearance-none cursor-pointer shadow-inner">
+      {options.map((opt, i) => <option value={opt.value} key={i} className="bg-[#121212] text-white">{opt.label}</option>)}
     </select>
-    <Settings2 size={16} className="absolute right-4 top-3.5 text-gray-600 pointer-events-none"/>
+    <Settings2 size={16} className="absolute right-4 top-3.5 text-white/40 pointer-events-none"/>
   </div>
 );
 
 const UploadBtn = ({ label, onChange, file }) => (
-  <label className={`group relative block w-full cursor-pointer overflow-hidden rounded-xl h-full ${file ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-white/20 bg-[#09090b]/70'} border border-dashed transition-all duration-300 hover:border-white/50 hover:bg-[#09090b]/90`}>
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+  <label className={`group relative block w-full cursor-pointer overflow-hidden rounded-2xl h-full backdrop-blur-md border transition-all duration-300 shadow-inner ${file ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-white/10 bg-black/20 hover:border-white/30 hover:bg-white/5'}`}>
     <div className="relative h-full py-4 px-2 flex flex-col items-center justify-center gap-2">
-        <UploadCloud size={20} className={`${file ? 'text-emerald-500' : 'text-gray-500 group-hover:text-[#5C2EE9]'} transition-colors duration-300`}/>
-        <span style={{ fontFamily: "'JetBrains Mono', monospace" }} className={`text-[10px] font-bold uppercase tracking-widest text-center mt-1 truncate w-full px-2 ${file ? 'text-emerald-400' : 'text-[#a1a1aa] group-hover:text-white'} transition-colors`}>
+        <UploadCloud size={22} className={`${file ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'text-white/30 group-hover:text-white/70'} transition-all duration-300`}/>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace" }} className={`text-[10px] font-bold uppercase tracking-widest text-center mt-1 truncate w-full px-2 ${file ? 'text-emerald-300' : 'text-white/40 group-hover:text-white/80'} transition-colors`}>
             {file ? file.name : label}
         </span>
     </div>
@@ -377,8 +393,18 @@ const UploadBtn = ({ label, onChange, file }) => (
   </label>
 );
 
-const ActionBtn = ({ label, onClick }) => (
-  <button onClick={onClick} className="w-full mt-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold uppercase tracking-widest py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-     <Play size={14} fill="currentColor"/> {label}
-  </button>
-);
+const ActionBtn = ({ label, onClick, color }) => {
+  const glowColors = {
+    blue: "hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/40 hover:text-white",
+    emerald: "hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/40 hover:text-white",
+    purple: "hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/40 hover:text-white",
+    orange: "hover:shadow-[0_0_20px_rgba(249,115,22,0.5)] bg-orange-500/20 text-orange-300 border-orange-500/30 hover:bg-orange-500/40 hover:text-white",
+  };
+  const btnStyle = glowColors[color] || "bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]";
+
+  return (
+    <button onClick={onClick} className={`w-full mt-4 backdrop-blur-md border font-bold uppercase tracking-widest text-[11px] py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 ${btnStyle}`}>
+       <Play size={14} fill="currentColor"/> {label}
+    </button>
+  );
+};
