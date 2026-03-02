@@ -30,7 +30,7 @@ export default function Dashboard() {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  // 1. Ferramentas Simples (Apenas 1 Ficheiro - S/N e STQQS)
+  // 1. Ferramentas Simples
   const processSingleFile = async (e, endpoint, downloadName) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -209,6 +209,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* AQUI ESTÃO OS 6 CARTÕES, SEM DUPLICAÇÕES */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* === PREENCHER PRAZOS E FREQUÊNCIA === */}
@@ -221,7 +222,7 @@ export default function Dashboard() {
                 <UploadBtn label="Planilha Destino" file={prazosDestino} onChange={(e) => setPrazosDestino(e.target.files[0])} />
                 <UploadBtn label="Base de Prazos" file={prazosBase} onChange={(e) => setPrazosBase(e.target.files[0])} />
              </div>
-             <ActionBtn label="Preencher Prazos" onClick={handlePreencherPrazos} />
+             <ActionBtn label="Processar Prazos" onClick={handlePreencherPrazos} />
         </GlassCard>
 
         {/* === PREENCHER IBGE === */}
@@ -233,7 +234,7 @@ export default function Dashboard() {
              <div className="h-20 mb-4">
                 <UploadBtn label="Planilha Destino (Base)" file={ibgeFile} onChange={(e) => setIbgeFile(e.target.files[0])} />
              </div>
-             <ActionBtn label="Preencher IBGE Automático" onClick={handlePreencherIbge} />
+             <ActionBtn label="Preencher IBGE" onClick={handlePreencherIbge} />
         </GlassCard>
 
         {/* === CRIAR REGIÃO === */}
