@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Mail, Users, Map, Database, LogOut, Lock, BookOpen, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Calendar, Mail, Users, Map, Database, LogOut, Lock, BookOpen, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import logoImg from '../assets/logo.png'; 
@@ -8,12 +8,12 @@ import logoImg from '../assets/logo.png';
 export default function Sidebar() {
   const location = useLocation();
   const { user, role, signOut } = useAuth();
-  const { theme, toggleTheme } = useTheme(); // Puxando o controle de tema
+  const { theme, toggleTheme } = useTheme(); 
   
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false); 
+  // 1. Estado inicial como 'true' para começar sempre recolhida
+  const [isCollapsed, setIsCollapsed] = useState(true); 
 
-  // Links alinhados com as rotas do App.jsx
   const items = [
     { path: '/', label: 'Ferramentas Gerais', icon: <LayoutDashboard size={20} /> },
     { path: '/workspace', label: 'Minhas Anotações', icon: <BookOpen size={20} /> },
@@ -65,18 +65,13 @@ export default function Sidebar() {
 
       {/* BARRA LATERAL */}
       <div 
-        className={`bg-[#09090b]/90 backdrop-blur-xl border-r border-white/5 flex flex-col justify-between p-6 z-20 shadow-2xl h-screen transition-all duration-500 relative shrink-0
+        // 2. Controlar expansão com o cursor (onMouseEnter e onMouseLeave)
+        onMouseEnter={() => setIsCollapsed(false)}
+        onMouseLeave={() => setIsCollapsed(true)}
+        className={`bg-[#09090b]/90 backdrop-blur-xl border-r border-white/5 flex flex-col justify-between p-6 z-50 shadow-2xl h-screen transition-all duration-500 ease-in-out relative shrink-0
         ${isCollapsed ? 'w-24 px-4' : 'w-72'}`}
       >
         
-        {/* BOTÃO DE RECOLHER/EXPANDIR */}
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-8 bg-[#09090b] border border-white/10 rounded-full p-1 text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all z-50 shadow-[0_0_15px_rgba(0,0,0,0.5)] focus:outline-none"
-        >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
-
         <div>
           <div className={`mb-10 flex flex-col transition-all duration-500 ${isCollapsed ? 'items-center mt-2' : 'items-center md:items-start px-2'}`}>
             
@@ -106,9 +101,9 @@ export default function Sidebar() {
                )}
             </Link>
 
-            <div className={`flex items-center gap-2 ${isCollapsed ? 'justify-center' : 'px-1'}`}>
+            <div className={`flex items-center gap-2 overflow-hidden transition-all duration-500 ${isCollapsed ? 'justify-center opacity-0 w-0 h-0' : 'px-1 opacity-100 h-auto'}`}>
               <div className="h-1.5 w-1.5 rounded-full bg-[#5C2EE9] animate-pulse shadow-[0_0_10px_#5C2EE9]"></div>
-              {!isCollapsed && <p className="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase whitespace-nowrap">Workspace</p>}
+              <p className="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase whitespace-nowrap">Workspace</p>
             </div>
           </div>
 
@@ -127,7 +122,8 @@ export default function Sidebar() {
                     {item.icon}
                   </span>
                   
-                  <span className={`relative z-10 tracking-wide whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 hidden' : 'w-auto opacity-100'}`}>
+                  {/* 3. Remoção do "hidden" para animar suavemente a largura e opacidade do texto */}
+                  <span className={`relative z-10 tracking-wide whitespace-nowrap overflow-hidden transition-all duration-500 ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
                     {item.label}
                   </span>
                   
@@ -149,7 +145,7 @@ export default function Sidebar() {
                     <Users size={20} />
                   </span>
                   
-                  <span className={`relative z-10 tracking-wide whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 hidden' : 'w-auto opacity-100'}`}>
+                  <span className={`relative z-10 tracking-wide whitespace-nowrap overflow-hidden transition-all duration-500 ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[200px] opacity-100'}`}>
                     Gestão Equipe
                   </span>
               </Link>
@@ -157,30 +153,29 @@ export default function Sidebar() {
 
            <div className="border-t border-white/10 pt-4 flex flex-col items-center">
               
-
               {/* DADOS DO USUÁRIO */}
-              <div className={`flex items-center w-full mb-4 ${isCollapsed ? 'justify-center' : 'gap-3 px-2'}`}>
-                 <div className="w-8 h-8 rounded-full border border-white/10 shrink-0 bg-[#5C2EE9]/20 flex items-center justify-center text-[#5C2EE9] font-bold text-xs uppercase">
+              <div className={`flex items-center w-full mb-4 overflow-hidden transition-all duration-500 ${isCollapsed ? 'justify-center' : 'gap-3 px-2'}`}>
+                 <div className="w-8 h-8 rounded-full border border-white/10 shrink-0 bg-[#5C2EE9]/20 flex items-center justify-center text-[#5C2EE9] font-bold text-xs uppercase transition-transform duration-500 hover:scale-110">
                     {user?.email?.charAt(0) || 'U'}
                  </div>
                  
-                 {!isCollapsed && (
-                   <div className="overflow-hidden transition-all duration-300 w-full">
-                       <p className="text-xs font-bold text-white truncate max-w-[150px]">{user?.email?.split('@')[0]}</p>
-                       <p className="text-[10px] text-gray-500 truncate max-w-[150px]">{user?.email}</p>
-                   </div>
-                 )}
+                 <div className={`overflow-hidden transition-all duration-500 ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[150px] opacity-100'}`}>
+                     <p className="text-xs font-bold text-white truncate w-full">{user?.email?.split('@')[0]}</p>
+                     <p className="text-[10px] text-gray-500 truncate w-full">{user?.email}</p>
+                 </div>
               </div>
 
               {/* BOTÃO DE SAIR */}
               <button 
                 onClick={handleLogout} 
                 title={isCollapsed ? "Sair do Sistema" : ""}
-                className={`flex items-center justify-center text-red-500/80 hover:text-red-400 text-xs font-bold uppercase py-3 rounded-xl hover:bg-red-500/10 transition-all group
+                className={`flex items-center justify-center text-red-500/80 hover:text-red-400 text-xs font-bold uppercase py-3 rounded-xl hover:bg-red-500/10 transition-all group overflow-hidden
                 ${isCollapsed ? 'w-10 px-0' : 'w-full px-4 gap-3'}`}
                >
                  <LogOut size={18} className="group-hover:scale-110 transition-transform shrink-0"/> 
-                 {!isCollapsed && <span className="whitespace-nowrap">Sair do Sistema</span>}
+                 <span className={`whitespace-nowrap overflow-hidden transition-all duration-500 ${isCollapsed ? 'max-w-0 opacity-0' : 'max-w-[150px] opacity-100'}`}>
+                   Sair do Sistema
+                 </span>
               </button>
            </div>
         </div>
