@@ -7,7 +7,7 @@ export default function TDE() {
   const [limite, setLimite] = useState('500');
   const [dados, setDados] = useState('');
 
-  const handleProcessar = () => {
+  const handleProcessar = async () => {
     if (!template) {
       toast.error('Selecione o modelo do Excel primeiro.', { style: { background: '#121212', color: '#fff', border: '1px solid #ef4444' } });
       return;
@@ -17,7 +17,39 @@ export default function TDE() {
       return;
     }
 
-    toast.success('Arquivos TDE sendo gerados em background!', { style: { background: '#121212', color: '#fff', border: '1px solid #10b981' } });
+    const toastId = toast.loading('Processando arquivos TDE na nuvem...', { style: { background: '#121212', color: '#fff' } });
+
+    try {
+      // 1. Preparar os dados para envio (Multipart FormData)
+      const formData = new FormData();
+      formData.append('template', template); // O arquivo capturado no input file
+      formData.append('limite', limite);
+      formData.append('dados', dados);
+
+      // 2. Fazer a requisição para o Backend
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tde/processar`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Erro ao processar TDE no servidor');
+
+      // 3. Receber o ficheiro ZIP e forçar o download no navegador
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Arquivos_TDE.zip'; // Nome do ficheiro que será baixado
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Ficheiros TDE gerados com sucesso!', { id: toastId, style: { background: '#121212', color: '#fff', border: '1px solid #10b981' } });
+    } catch (error) {
+      console.error(error);
+      toast.error('Ocorreu um erro na API.', { id: toastId, style: { background: '#121212', color: '#fff', border: '1px solid #ef4444' } });
+    }
   };
 
   return (
