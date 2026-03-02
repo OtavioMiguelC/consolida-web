@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #5C2EE9;
+  --color-primary-hover: #7b4dff;
+  --color-dark-bg: #09090b;
+  --color-dark-card: #121214;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)];
+  }
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)];
+  }
+  .glow-primary {
+    @apply shadow-[0_0_20px_rgba(92,46,233,0.3)];
+  }
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 transition-colors duration-300;
+}
+body.dark {
+  @apply bg-dark-bg text-white;
+}
