@@ -14,13 +14,10 @@ export default function Sidebar() {
   // 1. Estado inicial como 'true' para começar sempre recolhida
   const [isCollapsed, setIsCollapsed] = useState(true); 
 
+  // Modifique esta parte no topo do componente Sidebar
   const items = [
-    { path: '/', label: 'Ferramentas Gerais', icon: <LayoutDashboard size={20} /> },
-    { path: '/workspace', label: 'Minhas Anotações', icon: <BookOpen size={20} /> },
-    { path: '/agendamento', label: 'Agendamento TMS', icon: <Calendar size={20} /> },
-    { path: '/tde', label: 'Cadastro TDE', icon: <Mail size={20} /> },
+    { path: '/', label: 'Minhas Anotações', icon: <BookOpen size={20} /> },
     { path: '/ibge', label: 'Base IBGE', icon: <Database size={20} /> },
-    { path: '/rotas', label: 'Calculadora Rotas', icon: <Map size={20} /> },
   ];
 
   const handleLogout = () => {
